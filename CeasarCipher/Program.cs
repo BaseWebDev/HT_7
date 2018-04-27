@@ -24,7 +24,7 @@ namespace CeasarCipher
                 Console.ReadKey();
                 return;
             }
-            Console.WriteLine("Введит выражение для шифрования:");
+            Console.WriteLine("Введите выражение для шифрования:");
             encrypt.OpenString = Console.ReadLine();
             Console.WriteLine("Зашифрованное выражение: ");
             Console.WriteLine(encrypt.CloseString);
