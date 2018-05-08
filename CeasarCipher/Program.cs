@@ -1,22 +1,19 @@
 ﻿using System;
-using System.Security;
 
 namespace CeasarCipher
-{
-
-   
+{ 
     class Program
     {
         static void Main(string[] args)
         {
             Console.WriteLine("\t Шифр Цезаря");
             EncryptionCeasar encrypt = new EncryptionCeasar();
-            Console.Write("Введите ключ шифрования (целое число): ");  // Может быть отриц и полож, если 0 - отсут. шифрование
+            Console.Write("Введите ключ шифрования (целое положительное число): ");  // Может быть отриц и полож, если 0 - отсут. шифрование
             try {
                 if (int.TryParse(Console.ReadLine(), out int keyCipher)) {
                     encrypt.KeyCipher = keyCipher;
                 } else {
-                    throw new Exception(@"Некорректный ввод!");
+                    throw new ArgumentException(@"Некорректный ввод!");
                 }
             }
             catch (Exception ex) {
@@ -25,13 +22,15 @@ namespace CeasarCipher
                 return;
             }
             Console.WriteLine("Введите выражение для шифрования:");
-            encrypt.OpenString = Console.ReadLine();
+            encrypt.EditableString = Console.ReadLine();
+            encrypt.Cipher = EncryptionCeasar.Direction.Crypt;
+            encrypt.StartMechanism();
             Console.WriteLine("Зашифрованное выражение: ");
-            Console.WriteLine(encrypt.CloseString);
-            Console.WriteLine("И снова расшифруем: ");
-            encrypt.CloseString = encrypt.CloseString;
-            Console.WriteLine(encrypt.OpenString);
-
+            Console.WriteLine(encrypt.EditableString);
+            Console.WriteLine("И расшифруем: ");
+            encrypt.Cipher = EncryptionCeasar.Direction.Decrypt;
+            encrypt.StartMechanism();
+            Console.WriteLine(encrypt.EditableString);
         }
     }
 }

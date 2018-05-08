@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security;
 
 namespace CeasarCipher
 {
@@ -9,28 +8,14 @@ namespace CeasarCipher
     class EncryptionCeasar
     {
         private string [] AlfaBets = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ" };
-        private string openString;
-        private string closeString;
         private int keyCipher;
+        public enum Direction {
+            Crypt,
+            Decrypt
+        }
+        public string EditableString { get;set;}
 
-        public string OpenString {
-            get {
-                return openString;
-            }
-            set {
-                openString = value;
-                Crypt();
-            }
-        }
-        public string CloseString {
-            get {
-                return closeString;
-            }
-            set {
-                closeString = value;
-                Decrypt();
-            }
-        }
+        public Direction Cipher { get; set; }
 
         public int KeyCipher {
             private get {
@@ -38,58 +23,41 @@ namespace CeasarCipher
             }
             set {
                 if (value == 0) {
-                    throw new Exception (@"Шифрование отсутствует!!!");
+                    throw new ArgumentNullException (@"Шифрование отсутствует!!!");
                 } else if (value < 0) {
-                    throw new Exception(@"Неверный ключ шифрования!");
+                    throw new ArgumentOutOfRangeException(@"Неверный ключ шифрования!");
                 } else {
                     keyCipher = value;
                 }
             }
         }
 
-        private void Crypt() {
+        public void StartMechanism() {
+            int key=0;
+            if (Cipher == Direction.Crypt) {
+                key = keyCipher;
+            } else if (Cipher == Direction.Decrypt) {
+                key = -keyCipher;
+            }
+            string editableString = EditableString;
             string bufString = "";   
-                for (int i = 0; i < openString.Length; i++) {
-                    char curSimbol = openString[i];
-                    if (char.IsLetter(openString[i])) {
-                        curSimbol = char.ToUpper(openString[i]);
+                for (int i = 0; i < editableString.Length; i++) {
+                    char curSimbol = editableString[i];
+                    if (char.IsLetter(editableString[i])) {
+                        curSimbol = char.ToUpper(editableString[i]);
                         foreach (string alfaBet in AlfaBets) {
                             for (int j = 0; j < alfaBet.Length; j++) {
                                 if (curSimbol == alfaBet[j]) {
-                                    curSimbol = alfaBet[(j + keyCipher) % alfaBet.Length];
+                                    curSimbol = alfaBet[Math.Abs(j + key) % alfaBet.Length];
                                     break;
                                 }
                             }
                         }
-                        curSimbol = char.IsLower(openString[i]) ? char.ToLower(curSimbol) : curSimbol;
+                        curSimbol = char.IsLower(editableString[i]) ? char.ToLower(curSimbol) : curSimbol;
                     }
                     bufString += curSimbol;
-                }            
-            openString = String.Empty;
-            closeString = bufString;
-        }
-
-        private void Decrypt() {
-            string bufString = "";
-            for (int i = 0; i < closeString.Length; i++) {
-                char curSimbol = closeString[i];
-                if (char.IsLetter(closeString[i])) {
-                    curSimbol = char.ToUpper(closeString[i]);
-                    foreach (string alfaBet in AlfaBets) {
-                        for (int j = 0; j < alfaBet.Length; j++) {
-                            if (curSimbol == alfaBet[j]) {
-                                curSimbol = alfaBet[(j - keyCipher + alfaBet.Length) % alfaBet.Length];
-                                break;
-                            }
-                        }
-                    }
-                    curSimbol = char.IsLower(closeString[i]) ? char.ToLower(curSimbol) : curSimbol;
                 }
-                bufString += curSimbol;
-            }
-            closeString = String.Empty;
-            openString = bufString;
+            EditableString = bufString;
         }
-
     }
 }
