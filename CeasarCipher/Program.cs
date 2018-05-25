@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+
 
 namespace CeasarCipher
 { 
@@ -28,22 +28,24 @@ namespace CeasarCipher
                     return;
                 }
                 Console.WriteLine("Введите выражение для шифрования:");
-                encrypt.EditableString = Console.ReadLine();
+                string innerString = Console.ReadLine();
+                Encoding enc = Encoding.UTF8;
+                encrypt.MessageByte = enc.GetBytes(innerString);
                 encrypt.Cipher = EncryptionCeasar.Direction.Crypt;
                 encrypt.StartMechanism();
                 Console.WriteLine("Зашифрованное выражение: ");
-                Console.WriteLine(encrypt.EditableString);
+                Console.WriteLine(enc.GetString(encrypt.MessageByte));
                 Console.WriteLine("Строка сохранена в файле: " + defFileName);
-                SaveFile(defFileName,encrypt.EditableString);
+                SaveFile(defFileName,encrypt.MessageByte);
 
                 Console.WriteLine("И расшифруем: ");
                 var tempEncrypt = new EncryptionCeasar {
-                    EditableString = OpenFile(defFileName),
+                    MessageByte = OpenFile(defFileName),
                     KeyCipher = keyCipher,
                     Cipher = EncryptionCeasar.Direction.Decrypt
                 };
                 tempEncrypt.StartMechanism();
-                        Console.WriteLine(tempEncrypt.EditableString);
+                        Console.WriteLine(enc.GetString(tempEncrypt.MessageByte));
             } else { // C параметрами командной строки
                 int keyCipher;
                 Console.WriteLine("\t Режим пакетной обработки файла");
@@ -52,12 +54,12 @@ namespace CeasarCipher
                     var file = new FileInfo(args[0]);
                     if (file.Exists && (args[1]=="decrypt"|| args[1] == "crypt") && int.TryParse(args[2], out keyCipher)) {       
                         var tempEncrypt = new EncryptionCeasar {
-                            EditableString = OpenFile(file.FullName),
+                            MessageByte = OpenFile(file.FullName),
                             KeyCipher = keyCipher,
                             Cipher = (args[1] == "decrypt") ? EncryptionCeasar.Direction.Decrypt: EncryptionCeasar.Direction.Crypt
                         };
                         tempEncrypt.StartMechanism();
-                        SaveFile(file.FullName, tempEncrypt.EditableString); // Перезаписываем файл
+                        SaveFile(file.FullName, tempEncrypt.MessageByte); // Перезаписываем файл
                         Console.WriteLine("Файл: {0} обработан", file.FullName);
                     } else {
                         throw new ArgumentException(@"Некорректныe параметры командной строки! Для справки введите ""?""");
@@ -72,17 +74,16 @@ namespace CeasarCipher
             }
         }
 
-        static void SaveFile(string fileName, string message) {
+        static void SaveFile(string fileName, byte[] data) {
             using (var fs = new FileStream(fileName, FileMode.Create)) {
-                var data = Encoding.Default.GetBytes(message);
                 fs.Write(data, 0, data.Length);
             }
         }
-        static string OpenFile(string fileName) {
+        static byte[] OpenFile(string fileName) {
             using (var fs = new FileStream(fileName, FileMode.Open)) {
                 var data = new byte[fs.Length];
                 fs.Read(data, 0, data.Length);
-                return Encoding.Default.GetString(data);
+                return data;
             }          
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace CeasarCipher
 {
@@ -7,13 +8,12 @@ namespace CeasarCipher
     /// </summary>
     class EncryptionCeasar
     {
-        private string [] AlfaBets = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ" };
         private int keyCipher;
         public enum Direction {
             Crypt,
             Decrypt
         }
-        public string EditableString { get;set;}
+        public byte[] MessageByte { get;set;}
 
         public Direction Cipher { get; set; }
 
@@ -39,25 +39,13 @@ namespace CeasarCipher
             } else if (Cipher == Direction.Decrypt) {
                 key = -keyCipher;
             }
-            string editableString = EditableString;
-            string bufString = "";   
-                for (int i = 0; i < editableString.Length; i++) {
-                    char curSimbol = editableString[i];
-                    if (char.IsLetter(editableString[i])) {
-                        curSimbol = char.ToUpper(editableString[i]);
-                        foreach (string alfaBet in AlfaBets) {
-                            for (int j = 0; j < alfaBet.Length; j++) {
-                                if (curSimbol == alfaBet[j]) {
-                                    curSimbol = alfaBet[Math.Abs(j + key) % alfaBet.Length];
-                                    break;
-                                }
-                            }
-                        }
-                        curSimbol = char.IsLower(editableString[i]) ? char.ToLower(curSimbol) : curSimbol;
-                    }
-                    bufString += curSimbol;
-                }
-            EditableString = bufString;
+            // Сложно
+            //MessageByte = MessageByte.Select(x=>(byte)((Math.Abs(x + key)) % (byte.MaxValue + 1))).ToArray();
+            byte[] buffer = new byte[MessageByte.Length];
+            for (int i = 0; i < MessageByte.Length; i++) {
+                buffer[i] = (byte)((Math.Abs(MessageByte[i] + key)) % (byte.MaxValue + 1));
+            }
+            MessageByte = buffer;
         }
     }
 }
